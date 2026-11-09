@@ -1,0 +1,9 @@
+target
+out
+tmp
+.git
+.idea
+*.iml
+yu-ai-code-mother-frontend/node_modules
+yu-ai-code-mother-frontend/dist
+.env

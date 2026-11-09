@@ -1,0 +1,49 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: app-forge-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: yu_ai_code_mother
+      TZ: Asia/Shanghai
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql/create_table.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: .
+    container_name: app-forge-backend
+    ports:
+      - "8123:8123"
+    environment:
+      MYSQL_URL: jdbc:mysql://mysql:3306/yu_ai_code_mother?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      APP_DEPLOY_HOST: ${APP_DEPLOY_HOST:-http://localhost/api/static}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./app-forge-frontend
+      args:
+        VITE_API_BASE_URL: /api
+        VITE_DEPLOY_DOMAIN: ${VITE_DEPLOY_DOMAIN:-http://localhost}
+    container_name: app-forge-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:

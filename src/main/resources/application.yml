@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: app-forge-backend
+  # MySQL 连接：本地开发用默认值即可，部署时用环境变量覆盖
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/yu_ai_code_mother?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:root}
+
+server:
+  port: 8123
+  servlet:
+    context-path: /api
+
+# 应用部署后的访问地址（上线时用 APP_DEPLOY_HOST 覆盖为真实域名）
+app:
+  deploy:
+    host: ${APP_DEPLOY_HOST:http://localhost:8123/api/static}
+
+# springdoc-openapi
+springdoc:
+  group-configs:
+    - group: 'default'
+      packages-to-scan: com.sunxu.appforge.controller
+
+# knife4j
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+# AI 配置：密钥只能来自环境变量，禁止把 sk- 开头的 key 写进配置文件
+langchain4j:
+  open-ai:
+    chat-model:
+      base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+      api-key: ${DEEPSEEK_API_KEY:}
+      model-name: ${DEEPSEEK_MODEL:deepseek-v4-pro}
+      strict-json-schema: true
+      response-format: json_object
+      max-tokens: 16384
+      log-requests: true
+      log-responses: true
+    streaming-chat-model:
+      base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+      api-key: ${DEEPSEEK_API_KEY:}
+      model-name: ${DEEPSEEK_MODEL:deepseek-v4-pro}
+      max-tokens: 16384
+      log-requests: true
+      log-responses: true
